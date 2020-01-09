@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+  schedule:
+    - cron: '0 10 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Setup Golem
+      run: |
+        git config --local user.email "golem@d12frosted.io"
+        git config --local user.name "Golem"
+
+    - name: Rebase on top of the upstream master
+      run: ./rebase-on-upstream
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        force: true
