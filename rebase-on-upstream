@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+branch="master"
+remote="upstream"
+url="https://github.com/emacs-mirror/emacs.git"
+
+if ! git config "remote.$remote.url" > /dev/null; then
+  git remote add "$remote" "$url"
+fi
+
+git fetch "$remote"
+git rebase "$remote/$branch"
