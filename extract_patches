@@ -12,7 +12,26 @@ fi
 for commit in $(git log --format='%H' --reverse --grep="\[patch\] "); do
   message=$(git show -s --format=%B "$commit")
   name=${message#"[patch] "}
-  file="$name.patch"
-  git format-patch --stdout -1 "$commit" > "$file"
-  mv "$file" "$emacs_plus_root/patches/$file"
+
+  echo "Processing '$name'"
+
+  # prepare file name
+  patch_file="$name.patch"
+  target_file="$emacs_plus_root/patches/$patch_file"
+
+  # format patch
+  git format-patch --stdout -1 "$commit" > "$patch_file"
+
+  # update hash if possible
+  old_hash=$(sha256sum "$target_file" | cut -d " " -f 1)
+  new_hash=$(sha256sum "$patch_file" | cut -d " " -f 1)
+  if [ "$old_hash" != "$new_hash" ]; then
+    echo "  Hash don't match, updating formula"
+    echo "    old: $old_hash"
+    echo "    new: $new_hash"
+    sed -i "s/${old_hash}/${new_hash}/g" "$emacs_plus_root/Formula/emacs-plus.rb"
+  fi
+
+  # move the patch
+  mv "$patch_file" "$target_file"
 done
