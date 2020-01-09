@@ -439,11 +439,9 @@ ev_modifiers_helper (unsigned int flags, unsigned int left_mask,
 
 /* These flags will be OR'd or XOR'd with the NSWindow's styleMask
    property depending on what we're doing.  */
-#define FRAME_DECORATED_FLAGS (NSWindowStyleMaskTitled              \
-                               | NSWindowStyleMaskResizable         \
+#define FRAME_UNDECORATED_FLAGS ( NSWindowStyleMaskResizable         \
                                | NSWindowStyleMaskMiniaturizable    \
                                | NSWindowStyleMaskClosable)
-#define FRAME_UNDECORATED_FLAGS NSWindowStyleMaskBorderless
 
 /* TODO: Get rid of need for these forward declarations.  */
 static void ns_condemn_scroll_bars (struct frame *f);
@@ -1838,23 +1836,11 @@ ns_set_undecorated (struct frame *f, Lisp_Object new_value, Lisp_Object old_valu
     {
       block_input ();
 
-      if (NILP (new_value))
-        {
-          FRAME_UNDECORATED (f) = false;
-          [window setStyleMask: ((window.styleMask | FRAME_DECORATED_FLAGS)
-                                  ^ FRAME_UNDECORATED_FLAGS)];
+      [window setToolbar: nil];
+      /* Do I need to release the toolbar here?  */
 
-          [view createToolbar: f];
-        }
-      else
-        {
-          [window setToolbar: nil];
-          /* Do I need to release the toolbar here?  */
-
-          FRAME_UNDECORATED (f) = true;
-          [window setStyleMask: ((window.styleMask | FRAME_UNDECORATED_FLAGS)
-                                 ^ FRAME_DECORATED_FLAGS)];
-        }
+      FRAME_UNDECORATED (f) = true;
+      [window setStyleMask: (window.styleMask | FRAME_UNDECORATED_FLAGS)];
 
       /* At this point it seems we don't have an active NSResponder,
          so some key presses (TAB) are swallowed by the system.  */
@@ -7405,11 +7391,9 @@ not_in_argv (NSString *arg)
   maximizing_resize = NO;
 #endif
 
-  win = [[EmacsWindow alloc]
+  win = [[EmacsFSWindow alloc]
             initWithContentRect: r
-                      styleMask: (FRAME_UNDECORATED (f)
-                                  ? FRAME_UNDECORATED_FLAGS
-                                  : FRAME_DECORATED_FLAGS)
+                      styleMask: FRAME_UNDECORATED_FLAGS
                         backing: NSBackingStoreBuffered
                           defer: YES];
 
@@ -7443,11 +7427,6 @@ not_in_argv (NSString *arg)
   tem = f->name;
   name = NILP (tem) ? @"Emacs" : [NSString stringWithLispString:tem];
   [win setTitle: name];
-
-  /* toolbar support */
-  if (! FRAME_UNDECORATED (f))
-    [self createToolbar: f];
-
 
   [win setAppearance];
 
