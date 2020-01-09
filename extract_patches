@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -e
+
+emacs_plus_root="$1"
+
+if [ ! -d "$emacs_plus_root" ]; then
+  echo "Please specify emacs-plus root directory"
+  exit 1
+fi
+
+for commit in $(git log --format='%H' --reverse --grep="\[patch\] "); do
+  message=$(git show -s --format=%B "$commit")
+  name=${message#"[patch] "}
+  file="$name.patch"
+  git format-patch --stdout -1 "$commit" > "$file"
+  mv "$file" "$emacs_plus_root/patches/$file"
+done
