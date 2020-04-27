@@ -10,7 +10,7 @@ if [ ! -d "$emacs_plus_root" ]; then
 fi
 
 for commit in $(git log --format='%H' --reverse --grep="\[patch\] "); do
-  message=$(git show -s --format=%B "$commit")
+  message=$(git show -s --format=%s "$commit")
   name=${message#"[patch] "}
 
   echo "Processing '$name'"
