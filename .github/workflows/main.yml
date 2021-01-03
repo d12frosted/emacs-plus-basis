@@ -3,28 +3,28 @@ name: CI
 on:
   push:
     branches:
-    - master
+      - master
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: "0 */4 * * *"
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
-    - name: Setup Golem
-      run: |
-        git config --local user.email "golem@d12frosted.io"
-        git config --local user.name "Golem"
+      - name: Setup Golem
+        run: |
+          git config --local user.email "golem@d12frosted.io"
+          git config --local user.name "Golem"
 
-    - name: Rebase on top of the upstream master
-      run: ./rebase-on-upstream
+      - name: Rebase on top of the upstream master
+        run: ./rebase-on-upstream
 
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        force: true
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          force: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
