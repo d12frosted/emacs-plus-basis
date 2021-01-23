@@ -9,6 +9,11 @@ if [ ! -d "$emacs_plus_root" ]; then
   exit 1
 fi
 
+patches_dir="$emacs_plus_root/patches/emacs-28"
+
+formula="emacs-plus@28.rb"
+formula_file="$emacs_plus_root/Formula/$formula"
+
 for commit in $(git log --format='%H' --reverse --grep="\[patch\] "); do
   message=$(git show -s --format=%s "$commit")
   name=${message#"[patch] "}
@@ -17,7 +22,7 @@ for commit in $(git log --format='%H' --reverse --grep="\[patch\] "); do
 
   # prepare file name
   patch_file="$name.patch"
-  target_file="$emacs_plus_root/patches/$patch_file"
+  target_file="$patches_dir/$patch_file"
 
   # format patch
   git format-patch --stdout -1 "$commit" > "$patch_file"
@@ -29,7 +34,7 @@ for commit in $(git log --format='%H' --reverse --grep="\[patch\] "); do
     echo "  Hash don't match, updating formula"
     echo "    old: $old_hash"
     echo "    new: $new_hash"
-    sed -i "s/${old_hash}/${new_hash}/g" "$emacs_plus_root/Formula/emacs-plus.rb"
+    sed -i "s/${old_hash}/${new_hash}/g" "$formula_file"
   fi
 
   # move the patch
